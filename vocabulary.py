@@ -3,9 +3,9 @@
 class Voc:
     def __init__(self):
         self.trimmed = None
-        self.word2index = {}  # mapping from words to indexes
-        self.word2count = {}  # count of each word
         self.PAD_token = 0  # Used for padding short sentences
+        self.word2index = {"PAD": self.PAD_token}  # mapping from words to indexes
+        self.word2count = {"PAD": 0}  # count of each word
         self.index2word = {self.PAD_token: "PAD"}  # reverse mapping of indexes to words
         self.num_words = 1  # Count SOS, EOS, PAD
 
@@ -41,8 +41,8 @@ class Voc:
             len(keep_words), len(self.word2index), len(keep_words) / len(self.word2index)
         ))
         # Reinitialize dictionaries
-        self.word2index = {}
-        self.word2count = {}
+        self.word2index = {"PAD": self.PAD_token}
+        self.word2count = {"PAD": 0}
         self.index2word = {self.PAD_token: "PAD"}
         self.num_words = 1  # Count default tokens
         for word in keep_words:
@@ -50,7 +50,7 @@ class Voc:
 
     def indexesFromSentence(self, sentence):
         """Convert words of a sentence to their indexes"""
-        return [self.word2index[word] for word in sentence.split(' ')]
+        return [self.word2index[word] for word in sentence.split(' ') if word in self.get_words()]
 
     def pad_sentences(self, sentences, max_length, pad_direction='right'):
         """Pad all sentences in a list of lines"""

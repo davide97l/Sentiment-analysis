@@ -4,6 +4,7 @@ import string
 import os
 from torch.distributions import uniform
 import torch
+import numpy as np
 
 
 def preprocess_data(lines):
@@ -65,16 +66,15 @@ def load_data(dataset_path):
     return x_train, x_val, x_test, y_train, y_val, y_test
 
 
-def load_embed(embed_path):
+def load_embedding(embed_path):
     """Load word embedding and return word-embedding vocabulary"""
     embedding2index = {}
     with open(embed_path, 'r', encoding='utf-8') as f:
         for line in f.readlines():
             lexicons = line.split()
             word = lexicons[0]
-            embedding = [float(x) for x in lexicons[1:]]
-            embedding2index[word] = torch.Tensor(embedding)
-        embedding_size = len(embedding)
+            embedding2index[word] = torch.from_numpy(np.asarray(lexicons[1:], dtype='float32'))
+        embedding_size = len(lexicons) - 1
     return embedding2index, embedding_size
 
 
@@ -83,15 +83,27 @@ def load_embedding_matrix(embedding, words, embedding_size):
     embedding_matrix = torch.zeros(len(words), embedding_size)
     for i, word in enumerate(words):
         # Note: PAD embedded as sequence of zeros
-        if word not in embedding and word != 'PAD':
-            embedding_matrix[i] = uniform.Uniform(-0.25, 0.25).sample(torch.Size([embedding_size]))
+        if word not in embedding:
+            if word != 'PAD':
+                embedding_matrix[i] = uniform.Uniform(-0.25, 0.25).sample(torch.Size([embedding_size]))
         else:
             embedding_matrix[i] = embedding[word]
     return embedding_matrix
 
 
-def load_datasets(x_train, x_val, x_test, y_train, y_val, y_test, batch_size):
-    """Return iterables over a train, validation and test dataset"""
+def get_loaders(x_train, x_val, x_test, y_train, y_val, y_test, batch_size, device):
+    """Return iterables over train, validation and test dataset"""
+
+    # convert labels to vectors and put on device
+    y_train = torch.from_numpy(np.asarray(y_train, dtype='int32')).to(device)
+    y_val = torch.from_numpy(np.asarray(y_val, dtype='int32')).to(device)
+    y_test = torch.from_numpy(np.asarray(y_test, dtype='int32')).to(device)
+
+    # convert sequences of indexes to tensors and put on device
+    x_train = torch.from_numpy(np.asarray(x_train, dtype='int32')).to(device)
+    x_val = torch.from_numpy(np.asarray(x_val, dtype='int32')).to(device)
+    x_test = torch.from_numpy(np.asarray(x_test, dtype='int32')).to(device)
+
     train_array = torch.utils.data.TensorDataset(x_train, y_train)
     train_loader = torch.utils.data.DataLoader(train_array, batch_size)
 

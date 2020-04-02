@@ -1,96 +1,74 @@
 import torch
 import torch.utils
 import torch.utils.data
-import numpy as np
+import torch.nn.functional as F
 
 
-def batch2RNNinput(x_batch, device):
-	x_data = x_batch[:, :-1]
-	x_lengths = x_batch[:, -1:]
-	x_lengths = x_lengths.sort(axis=0)[0]
-	x_lengths = np.flip(np.array(x_lengths.cpu()), axis=0).copy()
-	x_lengths = torch.tensor([float(x) for x in x_lengths])
+def batch2RNNinput(x_batch):
+    """Adapt batch  such to be ready to packed during RNN forward pass"""
+    x_batch = x_batch.sort(axis=0)[0]
+    x_batch = torch.flip(x_batch, dims=[1, 0])
+    x_batch = x_batch.T
+    x_data = x_batch[1:]
+    x_lengths = x_batch[:1].squeeze(0)
 
-	x_data = x_data.sort(axis=0)[0]
-	x_data = np.flip(np.array(x_data.cpu()), axis=0).copy()
-	x_data = x_data.T
-	x_data = torch.from_numpy(x_data)
-
-	return x_data.to(device), x_lengths.to(device)
+    return x_data, x_lengths
 
 
-def accuracy(model, data, device, mode):
-	"""Return model accuracy"""
-	model.eval()
-	with torch.no_grad():
-		val_acc = 0
-		total = 0
-		for x, y in data:
-			x = x.long().to(device)
-			y = y.long().to(device)
+def evaluate(model, eval_set, device, mode):
+    model.eval()
+    with torch.no_grad():
+        tot_loss = 0.0
+        tot_accuracy = 0.0
+        for x, y in eval_set:
+            x = x.long().to(device)
+            y = y.long().to(device)
 
-			if mode == 'rnn':
-				x_data, x_len = batch2RNNinput(x, device)
-				out = model(x_data, x_len).squeeze(1)
-			if mode == 'cnn':
-				out = model(x)
+            if mode == 'rnn':
+                x_data, x_len = batch2RNNinput(x)
+                if 0. in x_len:
+                    continue
+                out = model(x_data, x_len)
+            else:
+                out = model(x)
 
-			total += x.size(0)
-			pred = torch.max(out, dim=1)[1]
-			val_acc += torch.sum(pred == y).item()
+            tot_loss += F.cross_entropy(out, y, reduction='sum').item()
 
-		return val_acc / total
+            predictions = torch.max(out, 1)[1]
+            tot_accuracy += torch.sum(predictions == y).item()
 
-
-def train(model, train_set, optimizer, criterion, device, mode='cnn'):
-	epoch_loss = 0
-	epoch_acc = 0
-
-	for x, y in train_set:
-		model.train()
-		optimizer.zero_grad()
-
-		x = x.long().to(device)
-		y = y.long().to(device)
-
-		if mode == 'rnn':
-			x_data, x_len = batch2RNNinput(x, device)
-			output = model(x_data, x_len).squeeze(1)
-		if mode == 'cnn':
-			output = model(x)
-
-		loss = criterion(output, y)
-
-		loss.backward()
-		optimizer.step()
-
-		epoch_loss += loss.item()
-		epoch_acc += accuracy(model, train_set, device, mode)
-
-	return epoch_loss / len(train_set), epoch_acc / len(train_set)
+        loss = tot_loss / len(eval_set.dataset)
+        acc = tot_accuracy / len(eval_set.dataset)
+        return loss, acc
 
 
-def evaluate(model, eval_set, criterion, device, mode):
-	epoch_loss = 0
-	epoch_acc = 0
+def train(model, train_set, optimizer, device, mode):
+    model.train()
+    tot_loss = 0.0
+    tot_accuracy = 0.0
+    for x, y in train_set:
+        x = x.long().to(device)
+        y = y.long().to(device)
 
-	model.eval()
+        model.zero_grad()
 
-	with torch.no_grad():
-		for x, y in eval_set:
+        if mode == 'rnn':
+            x_data, x_len = batch2RNNinput(x)
+            if 0. in x_len:
+                continue
+            out = model(x_data, x_len)
+        else:
+            out = model(x)
 
-			x = x.long().to(device)
-			y = y.long().to(device)
+        loss = F.cross_entropy(out, y, reduction='sum')
+        tot_loss += loss.item()
 
-			if mode == 'rnn':
-				x_data, x_len = batch2RNNinput(x, device)
-				output = model(x_data, x_len).squeeze(1)
-			if mode == 'cnn':
-				output = model(x)
+        predictions = torch.max(out, 1)[1]
+        tot_accuracy += torch.sum(predictions == y).item()
 
-			loss = criterion(output, y)
+        loss.backward()
+        optimizer.step()
 
-			epoch_loss += loss.item()
-			epoch_acc += accuracy(model, eval_set, device, mode)
-
-		return epoch_loss / len(eval_set), epoch_acc / len(eval_set)
+    loss = tot_loss / len(train_set.dataset)
+    acc = tot_accuracy / len(train_set.dataset)
+    return loss, acc
