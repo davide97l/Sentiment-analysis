@@ -10,9 +10,8 @@ import argparse
 if __name__ == '__main__':
     """
         python main.py -e 10 -es 300 -ed 0.2 -dr 0.2
-        python main.py -ml 50 -mc 0 -nf 20 -bs 32 -dr 0.2 -ed 0.2 -es 100 -fs "2,3,4" -e 10 -m "cnn" -dp "dataset/sst5" -nc 5
+        python main.py -ml 50 -mc 2 -nf 100 -bs 32 -dr 0.4 -ed 0.4 -es 300 -fs "1,2,3,5" -e 10 -m "cnn"
         python main.py --help
-        python main.py -ml 50 -mc 0 -nf 20 -bs 32 -dr 0.2 -ed 0.2 -es 100 -fs "2,3,4" -e 10 -m "cnn" -ps "left"
     """
     ap = argparse.ArgumentParser()
     ap.add_argument("-dp", "--dataset_path", type=str, default="dataset/sst5",
@@ -36,12 +35,6 @@ if __name__ == '__main__':
                     help="number of output classes")
     ap.add_argument("-mc", "--min_count", type=int, default=1,
                     help="remove rare words that appear in total less than min_count times")
-    ap.add_argument("-nf", "--n_filters", type=int, default=100,
-                    help="number of convolutional filters")
-    ap.add_argument("-fs", "--filter_sizes", type=str, default="2,3,4",
-                    help="size of the filters")
-    ap.add_argument("-rnfs", "--rnf_size", type=int, default=5,
-                    help="size of the recurrent filter")
     ap.add_argument("-sd", "--save_directory", type=str, default="model",
                     help="directory where to save a trained model")
     ap.add_argument("-mn", "--model_name", type=str, default="model",
@@ -51,11 +44,17 @@ if __name__ == '__main__':
     ap.add_argument("-m", "--model", type=str, default="cnn",
                     help="type of model: 'cnn', 'rnn', 'rnf'")
     ap.add_argument("-hs", "--hidden_size", type=int, default=300,
-                    help="hidden layers size")
+                    help="hidden layers size (rnn, rnf)")
     ap.add_argument("-nl", "--n_layers", type=int, default=2,
-                    help="number of hidden layers")
+                    help="number of hidden layers (rnn)")
     ap.add_argument("-bi", "--bidirectional", default=False, action='store_true',
-                    help="if True use bidirectional recurrent cells")
+                    help="if True use bidirectional recurrent cells (rnn)")
+    ap.add_argument("-nf", "--n_filters", type=int, default=100,
+                    help="number of convolutional filters (cnn)")
+    ap.add_argument("-fs", "--filter_sizes", type=str, default="2,3,4",
+                    help="size of the filters, if 'rnf' it will only used the first element (cnn, rnf)")
+    ap.add_argument("-rnfs", "--rnf_size", type=int, default=5,
+                    help="size of the recurrent filter (rnf)")
     args = ap.parse_args()
 
     model_type = args.model
@@ -131,7 +130,7 @@ if __name__ == '__main__':
             x_test_idx[i] = line
 
     embedding_matrix = None
-    if embedding_path is not None and load_path is not None:
+    if embedding_path is not None and load_path is None:
         print("Loading embedding...")
         # load embedding from path
         embedding2index, embedding_size = load_embedding(embedding_path)
