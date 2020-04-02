@@ -1,6 +1,6 @@
 # Sentiment-analysis
 
-Opinion mining (sometimes known as sentiment analysis or emotion AI) refers to the use of natural language processing, text analysis, computational linguistics, and biometrics to systematically identify, extract, quantify, and study aﬀective states and subjective information. Sentiment analysis is widely applied to the voice of the customer materials such as reviews and survey responses, online and social media, and healthcare materials for applications that range from marketing to customer service to clinical medicine. Industrial circles utilize opinion mining techniques to detect people’s preference for further recommendation, such as movie reviews and restaurant reviews. In this assignment, we need to establish a sentiment classiﬁcation model for the given sentence.
+Opinion mining (sometimes known as sentiment analysis or emotion AI) refers to the use of natural language processing, text analysis, computational linguistics, and biometrics to systematically identify, extract, quantify, and study aﬀective states and subjective information. Sentiment analysis is widely applied to the voice of the customer materials such as reviews and survey responses, online and social media, and healthcare materials for applications that range from marketing to customer service to clinical medicine. Industrial circles utilize opinion mining techniques to detect people’s preference for further recommendation, such as movie reviews and restaurant reviews. In this assignment, we need to establish a sentiment classiﬁcation model for the given sentence. In this project have been implement an CNN, RNN and RNF model for sentence sentiment classiﬁcation.
 
 ## Dataset preparation
 Each dataset should be formed by 3 files: `train.txt`, `dev.txt`, `test.txt`, each having the following structure. Make sure the 3 files are placed the same folder.
@@ -12,11 +12,54 @@ Each dataset should be formed by 3 files: `train.txt`, `dev.txt`, `test.txt`, ea
 ```
 You can find some examples in the directories `dataset/sst5` and `dataset/sst2` taken from Stanford Sentiment Treebank datasbase with 5 and 2 classes respectively.
 
+## Pretrained embedding
+You can download a pretrained embadding such as Glove (https://nlp.stanford.edu/projects/glove/) to initialize your embedding matrix. Once downloaded, put it in the folder `embed` (ex: `embed/glove6B.300d.txt`).
+
 ## CNN (Convolutional network)
+Train a convolutional network.
+```
+  python main.py -m "cnn" -dp "dataset/sst5"
+```
+Train a convolutional network with dropout and embedding dropout.
+```
+  python main.py -m "cnn" -dp "dataset/sst5" -dr 0.4 -ed 0.4
+```
+Change number, size and depth of its filters.
+```
+  python main.py -m "cnn" -dp "dataset/sst5" -fs "2,3,4,5" -nf 50
+```
+Train it with pretrained embedding.
+```
+  python main.py -m "cnn" -dp "dataset/sst5" -ep "embed/glove6B.300d.txt"
+```
+Load a pretrained model.
+```
+  python main.py -m "cnn" -dp "dataset/sst5" -lp "model/cnn/model.tar"
+```
+Train on a dataset with binary labels.
+```
+  python main.py -m "cnn" -dp "dataset/sst2" -nc 2
+```
 
 ## RNN (LSTM)
+Train a recurrent network.
+```
+  python main.py -m "rnn" -dp "dataset/sst5"
+```
+Change the number of layers and hidden size.
+```
+  python main.py -m "rnn" -dp "dataset/sst5" -nl 2 -hs 100
+```
 
 ## RNF (Recursive neural kernel)
+Train a convolutional network with recurrent neural filter.
+```
+  python main.py -m "rnf" -dp "dataset/sst5"
+```
+Change the size of the filter
+```
+  python main.py -m "rnf" -dp "dataset/sst5" -rnfs 10
+```
 
 ## References
 
