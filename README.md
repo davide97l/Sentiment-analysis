@@ -24,6 +24,9 @@ For more details about the preprocessign phase tou can refer to the `loader.py` 
 ## Pretrained embedding
 You can download a pretrained embadding such as Glove (https://nlp.stanford.edu/projects/glove/) to initialize your embedding matrix. Once downloaded, put it in the folder `embed` (ex: `embed/glove6B.300d.txt`).
 
+## Pretrained models
+I have uploaded some pretrained models in the folder `model`, one for each of the three models. All the models have been trained for 20 epochs, initialized with the glove.6B.300d embedding and with all the other parameters left as their default value (except for the RNN). When loading a pretrained model is it important that the used parameters are the same as the parameters the model as been trained on. You can see the command to load each of the pretrained model in their relative section. After training, a model will be saved at the path `model/model_type/model.tar` which it can be changed setting the appropriate parameters (see `--help`).
+
 ## CNN (Convolutional network)
 Train a convolutional network.
 ```
@@ -41,13 +44,13 @@ Train it with pretrained embedding.
 ```
   python main.py -m "cnn" -dp "dataset/sst5" -ep "embed/glove6B.300d.txt"
 ```
-Load a pretrained model.
-```
-  python main.py -m "cnn" -dp "dataset/sst5" -lp "model/cnn/model.tar"
-```
 Train on a dataset with binary labels.
 ```
   python main.py -m "cnn" -dp "dataset/sst2" -nc 2
+```
+Load a pretrained model.
+```
+  python main.py -m "cnn" -dp "dataset/sst5" -lp "model/cnn/cnn_model.tar" -dr 0.4 -ed 0.4
 ```
 Finally, you can use the command `--help` to visualize the full list of parameters you can fine tune as well as their description.
 
@@ -60,6 +63,10 @@ Change the number of layers and hidden size.
 ```
   python main.py -m "rnn" -dp "dataset/sst5" -nl 2 -hs 100
 ```
+Load a pretrained model.
+```
+  python main.py -m "rnn" -dp "dataset/sst5" -lp "model/cnn/rnn_model.tar" -dr 0.4 -ed 0.4 -hs 100 -bi
+```
 
 ## RNF (Recurrent neural filter)
 Train a convolutional network with recurrent neural filter.
@@ -69,6 +76,10 @@ Train a convolutional network with recurrent neural filter.
 Change the size of the recurrent filter
 ```
   python main.py -m "rnf" -dp "dataset/sst5" -rnfs 10
+```
+Load a pretrained model.
+```
+  python main.py -m "rnf" -dp "dataset/sst5" -lp "model/cnn/rnf_model.tar" -dr 0.4 -ed 0.4
 ```
 
 ## References
