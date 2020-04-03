@@ -19,6 +19,7 @@ During the preprocessing phase the following pipeline will be applied to each se
 - Remotion of non-purely alphabetical words.
 - Filtering of stop words.
 - Remotion of words less than two characters long.
+
 For more details about the preprocessign phase you can refer to the `loader.py` file.
 
 ## Pretrained embedding
