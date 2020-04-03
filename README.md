@@ -10,7 +10,7 @@ Each dataset should be formed by 3 files: `train.txt`, `dev.txt`, `test.txt`, ea
   ...
   lN sentenceN
 ```
-You can find some examples in the directories `dataset/sst5` and `dataset/sst2` taken from Stanford Sentiment Treebank datasbase with 5 and 2 classes respectively.
+You can find some examples in the directories `dataset/sst5` and `dataset/sst2` taken from Stanford Sentiment Treebank dataset with 5 and 2 classes respectively.
 
 ## Data preprocessing
 During the preprocessing phase the following pipeline will be applied to each sentence in each set: 
