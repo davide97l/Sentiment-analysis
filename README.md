@@ -14,11 +14,11 @@ You can find some examples in the directories `dataset/sst5` and `dataset/sst2` 
 
 ## Data preprocessing
 During the preprocessing phase the following pipeline will be applied to each sentence in each set: 
-- Remotion of punctuaction.
-- Lower case conversion.
-- Remotion of non-purely alphabetical words.
+- Removal of punctuation.
+- Characters Lower case conversion.
+- Filtering of non-purely alphabetical words.
 - Filtering of stop words.
-- Remotion of words less than two characters long.
+- Filtering of words less than two characters long.
 
 For more details about the preprocessign phase you can refer to the `loader.py` file.
 
