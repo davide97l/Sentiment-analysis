@@ -14,7 +14,7 @@ You can find some examples in the directories `dataset/sst5` and `dataset/sst2` 
 
 ## Data preprocessing
 During the preprocessing phase the following pipeline will be applied to each sentence in each set: 
-- Remtion of punctuaction.
+- Remotion of punctuaction.
 - Lower case conversion.
 - Remotion of non-purely alphabetical words.
 - Filtering of stop words.
