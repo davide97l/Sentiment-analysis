@@ -19,7 +19,7 @@ During the preprocessing phase the following pipeline will be applied to each se
 - Remotion of non-purely alphabetical words.
 - Filtering of stop words.
 - Remotion of words less than two characters long.
-For more details about the preprocessign phase tou can refer to the `loader.py` file.
+For more details about the preprocessign phase you can refer to the `loader.py` file.
 
 ## Pretrained embedding
 You can download a pretrained embadding such as Glove (https://nlp.stanford.edu/projects/glove/) to initialize your embedding matrix. Once downloaded, put it in the folder `embed` (ex: `embed/glove6B.300d.txt`).
