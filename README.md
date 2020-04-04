@@ -26,11 +26,11 @@ For more details about the preprocessign phase you can refer to the `loader.py` 
 You can download a pretrained embadding such as Glove (https://nlp.stanford.edu/projects/glove/) to initialize your embedding matrix. Once downloaded, put it in the folder `embed` (ex: `embed/glove6B.300d.txt`).
 
 ## Pretrained models
-I have uploaded some pretrained models in the folder `model`, one for each of the three models. All the models have been trained for 20 epochs, initialized with the glove.6B.300d embedding and with almost all the other parameters left as their default value (non-default parameter values are specified in the appropriate command). When loading a pretrained model is it important that the used parameters are the same as the parameters the model as been trained on. You can see the command to load each of the pretrained model in their relative section. After training, a model will be saved at the path `model/model_type/model.tar` which it can be changed setting the appropriate parameters (see `--help`). When using a pretrained model you should set the flag `--no_training` so to avoid training it again.
+I have uploaded some pretrained models in the folder `model`, one for each of the three models. All the models have been trained for 20 epochs, initialized with the glove.6B.300d embedding and with almost all the other parameters left as their default value (non-default parameter values are specified in the appropriate command). When loading a pretrained model is it important that the used parameters are the same as the parameters the model as been trained on. You can see the command to load each of the pretrained model in their relative section. After training, a model will be saved at the path `model/model_type/model.tar` which it can be changed setting the appropriate parameters (see `--help`). Moreover, when using a pretrained model you should set the flag `--no_training` so to avoid training it again.
 
 ## CNN (Convolutional network)
 
-**Note:** CNN model consists of multiple filters of different sizes which will look at different n-grams (1xn filters) along a sentence and learn to select the most interesting ones in order to classify it.
+**Note:** CNN model consists of multiple filters of different sizes which will look at different n-grams (1xn filters) along a sentence and learn to select the most useful ones in order to classify it.
 
 Train a convolutional network.
 ```
