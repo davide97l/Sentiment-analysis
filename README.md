@@ -29,6 +29,9 @@ You can download a pretrained embadding such as Glove (https://nlp.stanford.edu/
 I have uploaded some pretrained models in the folder `model`, one for each of the three models. All the models have been trained for 20 epochs, initialized with the glove.6B.300d embedding and with almost all the other parameters left as their default value (non-default parameter values are specified in the appropriate command). When loading a pretrained model is it important that the used parameters are the same as the parameters the model as been trained on. You can see the command to load each of the pretrained model in their relative section. After training, a model will be saved at the path `model/model_type/model.tar` which it can be changed setting the appropriate parameters (see `--help`). When using a pretrained model you should set the flag `--no_training` so to avoid training it again.
 
 ## CNN (Convolutional network)
+
+**Note:** CNN model consists of multiple filters of different sizes which will look at different n-grams (1xn filters) along a sentence and learn to select the most interesting ones in order to classify it.
+
 Train a convolutional network.
 ```
   python main.py -m "cnn" -dp "dataset/sst5"
@@ -37,7 +40,7 @@ Train a convolutional network with dropout and embedding dropout.
 ```
   python main.py -m "cnn" -dp "dataset/sst5" -dr 0.4 -ed 0.4
 ```
-Change number, size and depth of its filters.
+Add more filters with different sizes and change their depth (number of output channels).
 ```
   python main.py -m "cnn" -dp "dataset/sst5" -fs "2,3,4,5" -nf 50
 ```
@@ -55,7 +58,10 @@ Load a pretrained model.
 ```
 Finally, you can use the command `--help` to visualize the full list of parameters you can fine tune as well as their description.
 
-## RNN (LSTM)
+## RNN (Recurrent network)
+
+**Note:** RNN cells consists of bidirectional LSTM cells, it can also be set the number of layers.
+
 Train a recurrent network.
 ```
   python main.py -m "rnn" -dp "dataset/sst5"
@@ -70,6 +76,9 @@ Load a pretrained model (non-default parameter: `-nl 1`, `-hs 100`).
 ```
 
 ## RNF (Recurrent neural filter)
+
+**Note:** This model has been implemented based on the following paper: https://arxiv.org/pdf/1808.09315v1.pdf
+
 Train a convolutional network with recurrent neural filter.
 ```
   python main.py -m "rnf" -dp "dataset/sst5"
@@ -107,3 +116,4 @@ Finally, you can use the command `--help` to visualize the full list of paramete
 - https://github.com/bentrevett/pytorch-sentiment-analysis
 - https://github.com/avinashsai/Recurrent-Neural-Filters
 - https://github.com/bloomberg/cnn-rnf
+- https://arxiv.org/pdf/1808.09315v1.pdf
