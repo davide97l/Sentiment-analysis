@@ -32,7 +32,6 @@ class time_distributed(nn.Module):
         for i in range(x.size(1)):
             inp = self.dropout(x[:, i, :, :])
             out, _ = self.lstm(inp, None)
-            # print(out.shape)
             timesteps.append(torch.unsqueeze(out[:, -1, :], 1))
         return torch.cat(timesteps, 1)
 
@@ -70,7 +69,7 @@ class RNF(nn.Module):
 
 class CNN(nn.Module):
     """Convolutional model"""
-    def __init__(self, embedding_matrix, embedding_dim, n_filters=3, filter_sizes=(2, 3, 4), embedding_dropout=0,
+    def __init__(self, embedding_matrix, embedding_dim, n_filters=100, filter_sizes=(2, 3, 4), embedding_dropout=0,
                  dropout=0, output_dim=5, vocab_size=None):
         super().__init__()
 
@@ -106,7 +105,31 @@ class CNN(nn.Module):
         return logits
 
 
+class DCNN(CNN):
+    """Deep Convolutional model"""
+    def __init__(self, embedding_matrix, embedding_dim, n_filters=100, filter_sizes=(2, 3, 4), embedding_dropout=0,
+                 dropout=0, output_dim=5, n_layers=1, vocab_size=None):
+        super().__init__(embedding_matrix, embedding_dim, n_filters, filter_sizes, embedding_dropout,
+                         dropout, output_dim, vocab_size)
+
+        self.hidden_dim = len(filter_sizes) * n_filters
+        self.hidden_layers = nn.ModuleList([nn.Linear(self.hidden_dim, self.hidden_dim) for _ in range(n_layers)])
+        self.fc = nn.Linear(self.hidden_dim, output_dim)
+
+    def forward(self, x):
+        embedded = self.embedding_dropout(self.embedding(x))
+        embedded = embedded.unsqueeze(1)
+        conved = [F.relu(conv(embedded)).squeeze(3) for conv in self.conv_layers]
+        pooled = [F.max_pool1d(conv, conv.shape[2]).squeeze(2) for conv in conved]
+        cat = self.dropout(torch.cat(pooled, dim=1))
+        for hl in self.hidden_layers:
+            cat = self.dropout(hl(cat))
+        logits = self.fc(cat)
+        return logits
+
+
 class RNN(nn.Module):
+    """LSTM model"""
     def __init__(self, embedding_matrix, embedding_dim, hidden_dim=300, n_layers=2, bidirectional=True,
                  embedding_dropout=0, dropout=0, output_dim=5, vocab_size=None):
         super().__init__()
@@ -133,25 +156,21 @@ class RNN(nn.Module):
         # text = [sent len, batch size]
 
         embedded = self.embedding_dropout(self.embedding(text))
-
         # embedded = [sent len, batch size, emb dim]
 
         # pack sequence
         packed_embedded = nn.utils.rnn.pack_padded_sequence(embedded, text_lengths)
 
         packed_output, (hidden, cell) = self.rnn(packed_embedded)
-
-        # unpack sequence
-        output, output_lengths = nn.utils.rnn.pad_packed_sequence(packed_output)
-
-        # output = [sent len, batch size, hid dim * num directions]
-        # output over padding tokens are zero tensors
-
         # hidden = [num layers * num directions, batch size, hid dim]
         # cell = [num layers * num directions, batch size, hid dim]
 
+        # unpack sequence (but we don't need this)
+        output, output_lengths = nn.utils.rnn.pad_packed_sequence(packed_output)
+        # output = [sent len, batch size, hid dim * num directions]
+        # output over padding tokens are zero tensors
+
         # concat the final forward (hidden[-2,:,:]) and backward (hidden[-1,:,:]) hidden layers
-        # and apply dropout
         hidden = self.dropout(torch.cat((hidden[-2, :, :], hidden[-1, :, :]), dim=1))
         # hidden = [batch size, hid dim * num directions]
         return self.fc(hidden).squeeze(1)

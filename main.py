@@ -42,24 +42,28 @@ if __name__ == '__main__':
     ap.add_argument("-lp", "--load_path", type=str, default=None,
                     help="path to load a trained model, if None create a new model")
     ap.add_argument("-m", "--model", type=str, default="cnn",
-                    help="type of model: 'cnn', 'rnn', 'rnf'")
+                    help="type of model: 'cnn', 'rnn', 'rnf', 'dcnn'")
     ap.add_argument("-hs", "--hidden_size", type=int, default=300,
                     help="hidden layers size (rnn, rnf)")
     ap.add_argument("-nl", "--n_layers", type=int, default=2,
-                    help="number of hidden layers (rnn)")
+                    help="number of hidden layers (rnn, dcnn)")
     ap.add_argument("-bi", "--bidirectional", default=False, action='store_true',
                     help="if True use bidirectional recurrent cells (rnn)")
     ap.add_argument("-nf", "--n_filters", type=int, default=100,
-                    help="number of convolutional filters (cnn)")
+                    help="number of convolutional filters (cnn, dcnn)")
     ap.add_argument("-fs", "--filter_sizes", type=str, default="2,3,4",
-                    help="size of the filters, if 'rnf' it will only used the first element (cnn, rnf)")
+                    help="size of the filters, if 'rnf' it will only used the first element (cnn, rnf, dcnn)")
     ap.add_argument("-rnfs", "--rnf_size", type=int, default=5,
                     help="size of the recurrent filter (rnf)")
+    ap.add_argument("-nt", "--no_training", default=False, action='store_true',
+                    help="skip the training phase (useful if you just want to evaluate your model)")
     args = ap.parse_args()
 
     model_type = args.model
     model_name = args.model_name
+    no_training = args.no_training  # skip training phase
 
+    # directories
     dataset_path = args.dataset_path
     embedding_path = args.embedding_path
     save_path = args.save_directory
@@ -71,6 +75,7 @@ if __name__ == '__main__':
     if load_path is not None:
         checkpoint = torch.load(load_path)
 
+    # general parameters
     embedding_dropout = args.embedding_dropout
     dropout = args.dropout
     max_len = args.max_length
@@ -144,11 +149,15 @@ if __name__ == '__main__':
     elif model_type == 'cnn':
         model = CNN(embedding_matrix, embedding_dim, n_filters, filter_sizes,
                     embedding_dropout, dropout, num_classes, vocabulary.num_words).to(device)
+    elif model_type == 'dcnn':
+        model = DCNN(embedding_matrix, embedding_dim, n_filters, filter_sizes,
+                     embedding_dropout, dropout, num_classes, num_layers, vocabulary.num_words).to(device)
     elif model_type == 'rnn':
         model = RNN(embedding_matrix, embedding_dim, hidden_size, num_layers, bidirectional,
                     embedding_dropout, dropout, num_classes, vocabulary.num_words).to(device)
     else:
-        raise Exception("This model doesn't exists, supported models: 'cnn', 'rnn', 'rnf'")
+        raise Exception("This model doesn't exists, supported models: 'cnn', 'dcnn', 'rnn', 'rnf'")
+    print("Using model: ", model_name)
 
     if load_path:
         print("Restoring saved model...")
@@ -157,33 +166,34 @@ if __name__ == '__main__':
     x_train, x_val, x_test = get_loaders(x_train_idx, x_val_idx, x_test_idx, y_train, y_val, y_test,
                                          batch_size, device)
 
-    optimizer = torch.optim.Adam(model.parameters())
-    best_model = copy.deepcopy(model.state_dict())
-    best_val_loss = np.inf
+    if not no_training:
+        optimizer = torch.optim.Adam(model.parameters())
+        best_model = copy.deepcopy(model.state_dict())
+        best_val_loss = np.inf
+        print("Start training")
+        for epoch in range(epochs):
 
-    print("Start training")
-    for epoch in range(epochs):
+            train_loss, train_acc = train(model, x_train, optimizer, device, model_type)
+            val_loss, val_acc = evaluate(model, x_val, device, model_type)
 
-        train_loss, train_acc = train(model, x_train, optimizer, device, model_type)
-        val_loss, val_acc = evaluate(model, x_val, device, model_type)
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                best_model = copy.deepcopy(model.state_dict())
 
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            best_model = copy.deepcopy(model.state_dict())
+            print("Epoch {}".format(epoch))
+            print("\tTrain Loss {:.3f} | Train Acc {:.3f}%".format(train_loss, train_acc))
+            print("\tVal Loss {:.3f} | Val Acc {:.3f}%".format(val_loss, val_acc))
 
-        print("Epoch {}".format(epoch))
-        print("\tTrain Loss {:.3f} | Train Acc {:.3f}%".format(train_loss, train_acc))
-        print("\tVal Loss {:.3f} | Val Acc {:.3f}%".format(val_loss, val_acc))
-
-    model.load_state_dict(best_model)
+        model.load_state_dict(best_model)
 
     _, test_acc = evaluate(model, x_test, device, model_type)
     print('Test acc: {:.3f}%'.format(test_acc))
 
-    print("Saving model...")
-    torch.save({
-        'model': model.state_dict(),
-    }, os.path.join(full_save_path))
-    print("Model saved in: " + str(full_save_path))
+    if not no_training:
+        print("Saving model...")
+        torch.save({
+            'model': model.state_dict(),
+        }, os.path.join(full_save_path))
+        print("Model saved in: " + str(full_save_path))
 
     print("Program terminated")
