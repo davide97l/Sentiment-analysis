@@ -1,6 +1,6 @@
 # Sentiment-analysis
 
-Opinion mining (sometimes known as sentiment analysis or emotion AI) refers to the use of natural language processing, text analysis, computational linguistics, and biometrics to systematically identify, extract, quantify, and study aﬀective states and subjective information. Sentiment analysis is widely applied to the voice of the customer materials such as reviews and survey responses, online and social media, and healthcare materials for applications that range from marketing to customer service to clinical medicine. Industrial circles utilize opinion mining techniques to detect people’s preference for further recommendation, such as movie reviews and restaurant reviews. In this assignment, we need to establish a sentiment classiﬁcation model for the given sentence. In this project I have implemented a CNN, RNN and RNF model for sentence sentiment classiﬁcation.
+Opinion mining (sometimes known as sentiment analysis or emotion AI) refers to the use of natural language processing, text analysis, computational linguistics, and biometrics to systematically identify, extract, quantify, and study aﬀective states and subjective information. Sentiment analysis is widely applied to the voice of the customer materials such as reviews and survey responses, online and social media, and healthcare materials for applications that range from marketing to customer service to clinical medicine. Industrial circles utilize opinion mining techniques to detect people’s preference for further recommendation, such as movie reviews and restaurant reviews. In this assignment, we need to establish a sentiment classiﬁcation model for the given sentence. In this project I have implemented a CNN, DCNN, RNN and RNF model for sentence sentiment classiﬁcation.
 
 ## Dataset preparation
 Each dataset should be formed by 3 files: `train.txt`, `dev.txt`, `test.txt`, each having the following structure. Make sure the 3 files are placed the same folder.
@@ -26,7 +26,7 @@ For more details about the preprocessign phase you can refer to the `loader.py` 
 You can download a pretrained embadding such as Glove (https://nlp.stanford.edu/projects/glove/) to initialize your embedding matrix. Once downloaded, put it in the folder `embed` (ex: `embed/glove6B.300d.txt`).
 
 ## Pretrained models
-I have uploaded some pretrained models in the folder `model`, one for each of the three models. All the models have been trained for 20 epochs, initialized with the glove.6B.300d embedding and with all the other parameters left as their default value (except for the RNN). When loading a pretrained model is it important that the used parameters are the same as the parameters the model as been trained on. You can see the command to load each of the pretrained model in their relative section. After training, a model will be saved at the path `model/model_type/model.tar` which it can be changed setting the appropriate parameters (see `--help`).
+I have uploaded some pretrained models in the folder `model`, one for each of the three models. All the models have been trained for 20 epochs, initialized with the glove.6B.300d embedding and with almost all the other parameters left as their default value (non-default parameter values are specified in the appropriate command). When loading a pretrained model is it important that the used parameters are the same as the parameters the model as been trained on. You can see the command to load each of the pretrained model in their relative section. After training, a model will be saved at the path `model/model_type/model.tar` which it can be changed setting the appropriate parameters (see `--help`). When using a pretrained model you should set the flag `--no_training` so to avoid training it again.
 
 ## CNN (Convolutional network)
 Train a convolutional network.
@@ -51,7 +51,7 @@ Train on a dataset with binary labels.
 ```
 Load a pretrained model.
 ```
-  python main.py -m "cnn" -dp "dataset/sst5" -lp "model/cnn/cnn_model.tar" -dr 0.4 -ed 0.4
+  python main.py -m "cnn" -dp "dataset/sst5" -lp "model/cnn/cnn_model.tar" -dr 0.4 -ed 0.4 --no_training
 ```
 Finally, you can use the command `--help` to visualize the full list of parameters you can fine tune as well as their description.
 
@@ -64,9 +64,9 @@ Change the number of layers and hidden size.
 ```
   python main.py -m "rnn" -dp "dataset/sst5" -nl 2 -hs 100
 ```
-Load a pretrained model.
+Load a pretrained model (non-default parameter: `-nl 1`, `-hs 100`).
 ```
-  python main.py -m "rnn" -dp "dataset/sst5" -lp "model/cnn/rnn_model.tar" -dr 0.4 -ed 0.4 -hs 100 -bi
+  python main.py -m "rnn" -dp "dataset/sst5" -lp "model/rnn/rnn_model.tar" -dr 0.4 -ed 0.4 -bi -hs 100 --no_training
 ```
 
 ## RNF (Recurrent neural filter)
@@ -80,8 +80,27 @@ Change the size of the recurrent filter
 ```
 Load a pretrained model.
 ```
-  python main.py -m "rnf" -dp "dataset/sst5" -lp "model/cnn/rnf_model.tar" -dr 0.4 -ed 0.4
+  python main.py -m "rnf" -dp "dataset/sst5" -lp "model/rnf/rnf_model.tar" -dr 0.4 -ed 0.4 --no_training
 ```
+
+## DCNN (Deep convolutional network)
+
+**Note:** DCNN model is based on the CNN architecture with a deep dense network built on top of it. Thus, the only new parameter that is introduced is `n_layers` (used also by RNN) which in this case specify the number of dense hidden layers.
+
+Train a deep convolutional network.
+```
+  python main.py -m "dcnn" -dp "dataset/sst5"
+```
+Change the number of dense hidden layers.
+```
+  python main.py -m "dcnn" -dp "dataset/sst5" -nl 2
+```
+Load a pretrained model (non-default parameter: `-nl 1`).
+```
+  python main.py -m "cnn" -dp "dataset/sst5" -lp "model/dcnn/dcnn_model.tar" -dr 0.4 -ed 0.4 -nl 1 --no_training
+```
+Finally, you can use the command `--help` to visualize the full list of parameters you can fine tune as well as their description.
+
 
 ## References
 
