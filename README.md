@@ -30,7 +30,7 @@ I have uploaded some pretrained models in the folder `model`, one for each of th
 
 ## CNN (Convolutional network)
 
-**Note:** CNN model consists of multiple filters of different sizes which will look at different n-grams (1xn filters) along a sentence and learn to select the most useful ones in order to classify it.
+**Note:** CNN model consists of multiple filters of different sizes which will look at different n-grams (1xn filters) along a sentence and learn to select the most useful ones in order to classify it. You can find more details on https://davideliu.com/2020/04/05/sentences-sentiment-analysis-with-cnn/.
 
 Train a convolutional network.
 ```
