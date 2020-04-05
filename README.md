@@ -70,7 +70,7 @@ Change the number of layers and hidden size.
 ```
   python main.py -m "rnn" -dp "dataset/sst5" -nl 2 -hs 100
 ```
-Load a pretrained model (non-default parameter: `-nl 1`, `-hs 100`).
+Load a pretrained model (non-default parameter: `-nl 1`, `-hs 100`, `-bi`).
 ```
   python main.py -m "rnn" -dp "dataset/sst5" -lp "model/rnn/rnn_model.tar" -dr 0.4 -ed 0.4 -bi -hs 100 --no_training
 ```
