@@ -1,6 +1,6 @@
 # Sentiment-analysis
 
-Opinion mining (sometimes known as sentiment analysis or emotion AI) refers to the use of natural language processing, text analysis, computational linguistics, and biometrics to systematically identify, extract, quantify, and study aﬀective states and subjective information. Sentiment analysis is widely applied to the voice of the customer materials such as reviews and survey responses, online and social media, and healthcare materials for applications that range from marketing to customer service to clinical medicine. Industrial circles utilize opinion mining techniques to detect people’s preference for further recommendation, such as movie reviews and restaurant reviews. In this assignment, we need to establish a sentiment classiﬁcation model for the given sentence. In this project I have implemented a CNN, DCNN, RNN and RNF model for sentence sentiment classiﬁcation.
+Opinion mining (sometimes known as sentiment analysis or emotion AI) refers to the use of natural language processing, text analysis, computational linguistics, and biometrics to systematically identify, extract, quantify, and study aﬀective states and subjective information. Sentiment analysis is widely applied to the voice of the customer materials such as reviews and survey responses, online and social media, and healthcare materials for applications that range from marketing to customer service to clinical medicine. Industrial circles utilize opinion mining techniques to detect people’s preference for further recommendation, such as movie reviews and restaurant reviews. In this assignment, we need to establish a sentiment classiﬁcation model for the given sentence. In this project I have implemented a CNN, DCNN, RNN, RNF and BERT model for sentence sentiment classiﬁcation.
 
 ## Dataset preparation
 Each dataset should be formed by 3 files: `train.txt`, `dev.txt`, `test.txt`, each having the following structure. Make sure the 3 files are placed the same folder.
@@ -111,9 +111,23 @@ Load a pretrained model (non-default parameter: `-nl 1`).
 Finally, you can use the command `--help` to visualize the full list of parameters you can fine tune as well as their description.
 
 
+## BERT
+
+**Note:** BERT model, training and evaluation are in a separate file (`--bert.py`).
+
+Train BERT.
+```
+  python bert.py"
+```
+Train BERT on a dataset with 2 classes for 2 epochs.
+```
+  python bert.py -nc 2 -dp "dataset/sst2" -e 2
+```
+
 ## References
 
 - https://github.com/bentrevett/pytorch-sentiment-analysis
 - https://github.com/avinashsai/Recurrent-Neural-Filters
 - https://github.com/bloomberg/cnn-rnf
 - https://arxiv.org/pdf/1808.09315v1.pdf
+- https://github.com/munikarmanish/bert-sentiment/tree/master/bert_sentiment
